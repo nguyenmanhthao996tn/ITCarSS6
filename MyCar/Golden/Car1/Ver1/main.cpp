@@ -24,6 +24,7 @@ int main(void)
 	
 	while (true)
 	{
+		sensor_cmp();
 		led7(encoder_pulse);
 		if (get_button(BTN0)) encoder_pulse = 0;
 		if (get_button(BTN1)) break;
@@ -238,52 +239,41 @@ int main(void)
 					
 					case 0b00011000: /* Chay thang */
 					handle( 0 );
-					//speed( 100 ,100 );
 					break;
 					
 					case 0b00011100:
 					case 0b00001000:
-					//speed(100,100);
 					handle(9 + addition_handle);
 					break;
 					case 0b00001100:
-					//speed(100,100);
 					handle(17 + addition_handle);
 					break;
 					case 0b00001110:
 					case 0b00000100:
-					//speed(100,85);
 					handle(31 + addition_handle);
 					break;
 					case 0b00000110:
-					//speed(100,80);
 					handle(50 + addition_handle);
 					break;
 					case 0b00000010:
-					//speed(100,70);
 					handle(75 + addition_handle);
 					break;
 					
 					case 0b00111000:
 					case 0b00010000:
-					//speed(100,100);
 					handle(-9 - addition_handle);
 					break;
 					case 0b00110000:
-					//speed(100,100);
 					handle(-17 - addition_handle);
 					break;
 					case 0b01110000:
 					case 0b00100000:
-					//speed(85,100);
 					handle(-31 - addition_handle);
 					break;
 					case 0b01100000:
-					//speed(80,100);
 					handle(-50 - addition_handle);
 					break;
 					case 0b01000000:
-					//speed(70,100);
 					handle(-75 - addition_handle);
 					break;
 					
@@ -389,6 +379,7 @@ int main(void)
 				speed( -100 , 80 );
 				pattern = 31;
 				timer_cnt = 0;
+				encoder_pulse = 0;
 			break; /* case 26 */
 			
 			case 27: /* phai */
@@ -398,6 +389,7 @@ int main(void)
 				speed( 80 , -100 );
 				pattern = 41;
 				timer_cnt = 0;
+				encoder_pulse = 0;
 			break; /* case 27 */
 			
 			case 31:
@@ -407,13 +399,14 @@ int main(void)
 				{
 					pattern = 32;
 					timer_cnt = 0;
+					encoder_pulse = 0;
 				}
 			break; /* case 31 */
 			
 			case 32:
 				led7(32);
 				sensor = sensor_cmp();
-				if( (sensor & 0b11100111) == 0b00100000 )
+				if((sensor & 0b11100111) == 0b00100000)
 				{
 					pattern = 10;
 				}
@@ -432,7 +425,7 @@ int main(void)
 			case 42:
 				led7(42);
 				sensor = sensor_cmp();
-				if( (sensor & 0b11100111) == 0b00000100 ) 
+				if((sensor & 0b11100111) == 0b00000100) 
 				{
 					pattern = 10;
 				}
@@ -445,7 +438,7 @@ int main(void)
 				sensor = sensor_cmp();
 				if (((sensor & 0b00000111) == 0b00000111) || ((sensor & 0b00001111) == 0b00001111) || ((sensor & 0b00011111) == 0b00011111))
 				{
-					pattern = 21 ;
+					pattern = 21;
 					break;
 				}
 				

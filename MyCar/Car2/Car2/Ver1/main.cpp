@@ -24,12 +24,14 @@ int main(void)
 	
 	while (true)
 	{
+		sensor_cmp();
 		led7(encoder_pulse);
 		if (get_button(BTN0)) encoder_pulse = 0;
 		if (get_button(BTN1)) break;
 	}
 	
 	pattern = 10; /* Chay thang */
+	set_encoder(-1);
 	
     while (true)
     {
@@ -172,27 +174,27 @@ int main(void)
 				switch(sensor_cmp() & 0b00110011)
 				{
 					case 0b00000011:
-						speed(/*0*/-10,80);
+						speed(-10,80);
 						handle(-105);
 					break;
 					
 					case 0b00000001:
-						speed(/*15*/5,80);
+						speed(5,80);
 						handle(-90);
 					break;
 					
 					case 0b00000000:
-						speed(/*20*/10,80);
+						speed(10,80);
 						handle(-78);
 					break;
 					
 					case 0b00100000:
-						speed(/*25*/15,80);
+						speed(15,80);
 						handle(-60);
 					break;
 					
 					case 0b00110000:
-						speed(/*30*/20,80);
+						speed(20,80);
 						handle(-52);
 						pattern = 10;
 					break;
@@ -294,7 +296,7 @@ int main(void)
 				
 				sensor = sensor_cmp();
 				/* Cua trai */
-				if(((encoder_pulse > 85) || (timer_cnt > 150)) && (((sensor & 0b11111000) == 0b11111000)  || ((sensor & 0b11110000) == 0b11110000) || ((sensor & 0b11100000) == 0b11100000) || ((sensor & 0b11111100) == 0b11111100)))	/* Neu gap tin hieu nay la goc cua 90 trai thi be */
+				if ((encoder_pulse > 12) && (((sensor & 0b11111000) == 0b11111000) || ((sensor & 0b11110000) == 0b11110000) || ((sensor & 0b11100000) == 0b11100000) || ((sensor & 0b11111100) == 0b11111100)))	/* Neu gap tin hieu nay la goc cua 90 trai thi be */
 				{
 					pattern = 26;
 					timer_cnt=0;
@@ -302,7 +304,7 @@ int main(void)
 					break;
 				}
 				/* Cua phai */
-				if(((encoder_pulse > 85) || (timer_cnt > 150)) && (((sensor & 0b00011111) == 0b00011111 ) ||((sensor & 0b00000111) == 0b00000111) || ((sensor & 0b00001111) == 0b00001111) || ((sensor & 0b00111111) == 0b00111111))) /* Neu gap tin hieu nay la goc cua 90 phai thi be */
+				if ((encoder_pulse > 12) && (((sensor & 0b00011111) == 0b00011111 ) || ((sensor & 0b00000111) == 0b00000111) || ((sensor & 0b00001111) == 0b00001111) || ((sensor & 0b00111111) == 0b00111111))) /* Neu gap tin hieu nay la goc cua 90 phai thi be */
 				{
 					pattern = 27;
 					timer_cnt=0;
@@ -310,7 +312,7 @@ int main(void)
 					break;
 				}
 				/* No line */
-				if (sensor == 0x00)
+				if ((sensor & 0b01111110) == 0x00)
 				{
 					pattern = 73;
 					handle(0);
@@ -320,50 +322,59 @@ int main(void)
 				}
 				
 				/* Nguoc lai thi chinh thang cho xe */
-				switch(sensor)
+				switch (sensor_cmp() & 0b01111110)
 				{
-					case 0b00011000:
-						handle(0);
-						//speed(20,20 );
+					case 0b01111110:
 					break;
 					
-					/* Lech phai */
+					case 0b00011000: /* Chay thang */
+					handle(0);
+					break;
+					
+					case 0b00011100:
 					case 0b00001000:
-						//speed(23,3);
-						handle(8);
+					handle(9);
 					break;
+					
 					case 0b00001100:
-						//speed(23,-3);
-						handle(10);
+					handle(17);
 					break;
+					
+					case 0b00001110:
 					case 0b00000100:
-						//speed(23,-8);
-						handle(13);
+					handle(31);
 					break;
+					
 					case 0b00000110:
+					handle(50);
+					break;
+					
 					case 0b00000010:
-						//speed(23,-13);
-						handle(18);
+					handle(75);
 					break;
-					//////////////////////////////////////////////////////////////////////////
-					/* Lech trai */
+					
+					case 0b00111000:
 					case 0b00010000:
-						//speed(5,20);
-						handle(-8);
+					handle(-9);
 					break;
+					
 					case 0b00110000:
-						//speed(0,20);
-						handle(-10);
+					handle(-17);
 					break;
+					
+					case 0b01110000:
 					case 0b00100000:
-						//speed(-5,20);
-						handle(-13);
+					handle(-31);
 					break;
+					
 					case 0b01100000:
-					case 0b01000000:
-						//speed(10,20);
-						handle(-18);
+					handle(-50);
 					break;
+					
+					case 0b01000000:
+					handle(-75);
+					break;
+					
 					default:
 					break;
 				}
@@ -373,18 +384,20 @@ int main(void)
 				led7(26);
 				
 				handle(-SERVO_ANGLE_MAX); /* -120 */
-				speed( 40 , 80 );
+				speed( -100 , 80 );
 				pattern = 31;
 				timer_cnt = 0;
+				encoder_pulse = 0;
 			break; /* case 26 */
 			
 			case 27: /* phai */
 				led7(27);
 				
 				handle(SERVO_ANGLE_MAX); /* 120 */
-				speed( 80 , 40 );
+				speed( 80 , -100 );
 				pattern = 41;
 				timer_cnt = 0;
+				encoder_pulse = 0;
 			break; /* case 27 */
 			
 			case 31:
@@ -394,13 +407,14 @@ int main(void)
 				{
 					pattern = 32;
 					timer_cnt = 0;
+					encoder_pulse = 0;
 				}
 			break; /* case 31 */
 			
 			case 32:
 				led7(32);
 				sensor = sensor_cmp();
-				if( (sensor & 0b11100111) == 0b00100000 )
+				if((sensor & 0b11100111) == 0b00100000)
 				{
 					pattern = 10;
 				}
@@ -419,20 +433,20 @@ int main(void)
 			case 42:
 				led7(42);
 				sensor = sensor_cmp();
-				if( (sensor & 0b11100111) == 0b00000100 ) 
+				if((sensor & 0b11100111) == 0b00000100) 
 				{
 					pattern = 10;
 				}
 			break; /* case 42 */
 			
-				/* Chuyen lan trai */
-				case 51:
-					led7(51);
+			/* Chuyen lan trai */
+			case 51:
+				led7(51);
 				
-					sensor = sensor_cmp();
+				sensor = sensor_cmp();
 				if (((sensor & 0b00000111) == 0b00000111) || ((sensor & 0b00001111) == 0b00001111) || ((sensor & 0b00011111) == 0b00011111))
 				{
-					pattern = 21 ;
+					pattern = 21;
 					break;
 				}
 				
@@ -507,28 +521,19 @@ int main(void)
 			break; /* case 63 */
 			
 			/* No line */
-			case 71:
-				led7(71);
-				
-				speed(100,100);
-				
-				if( timer_cnt > 100 || encoder_pulse > 10)
-				{
-					pattern = 72;
-					timer_cnt = 0;
-				}
-			break; /* case 71 */
-			
 			case 73:
 			led7(73);
-			
-			speed(100,100);
+			set_encoder(12);
+			speed(60,60);
 			sensor = sensor_cmp();
-			if (sensor & 0b10000000) handle(20 + addition_handle);
-			if (sensor & 0b00000001) handle(-20 - addition_handle);
-			if ((sensor & 0b01111110) > 0)
+			if ((sensor & 0b11000000) == 0b11000000) handle(40);
+			if ((sensor & 0b10000000) == 0b10000000) handle(30);
+			if ((sensor & 0b00000011) == 0b00000011) handle(-40);
+			if ((sensor & 0b00000001) == 0b00000001) handle(-30);
+			if ((sensor & 0b00111100) != 0)
 			{
 				pattern = 10;
+				set_encoder(-1);
 			}
 			break; /* case 73 */
 			
@@ -541,13 +546,8 @@ int main(void)
 
 ISR(TIMER0_COMP_vect) /* 1ms */
 {
-	cal_ratio();
-	
-	/*tmp2 = get_speed_different();
-	tmp = tmp2>tmp?tmp2:tmp;
-	led7(tmp>=0?tmp:-tmp);*/
-	
 	print();
+	cal_ratio();
 	timer_cnt++;
 }
 

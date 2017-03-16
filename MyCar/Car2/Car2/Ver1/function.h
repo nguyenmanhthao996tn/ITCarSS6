@@ -39,7 +39,7 @@
 #define BTN2	0b11110111
 
 /* -------------------- Constants define -------------------- */
-#define SERVO_CENTER       3150
+#define SERVO_CENTER       3110
 #define STEP			   4
 #define SERVO_ANGLE_MAX    185
 
@@ -66,7 +66,7 @@ int16_t pulse_ratio;
 float ratio_base, ratio;
 float delay = 0;
 
-uint8_t cSpeed = 0xff;
+uint8_t cSpeed = 0xff, incCounter = 0;
 int16_t cSpeedDiff = 0;
 
 /* -------------------- BUTTON + SWITCH -------------------- */
@@ -105,14 +105,18 @@ void cal_ratio( void )
 		}
 		else
 		{
-			if      (pulse_ratio < (velocity / 2))     ratio = ratio_base + 0.25;
-			else if (pulse_ratio > (velocity / 2))     ratio = ratio_base - 0.3;
+			if      (pulse_ratio < velocity / 2)    ratio = ratio_base + 0.3;
+			else if (pulse_ratio < velocity)        ratio = ratio_base + 0.1;
+			else if (pulse_ratio > velocity)        ratio = ratio_base - 0.35;
+			else if (pulse_ratio > velocity / 2)    ratio = ratio_base - 0.25;
 			else ratio = ratio_base;
 			
 			if (ratio <= 0) ratio = 0.1;
 		}
 		
 		cSpeedDiff = pulse_ratio - cSpeed;
+		if (cSpeedDiff > 0) incCounter++;
+		else incCounter = 0;
 		cSpeed = pulse_ratio;
 		
 		pulse_ratio = 0;
@@ -122,7 +126,6 @@ void cal_ratio( void )
 
 bool speed_wait(uint8_t speed)
 {
-	//return (speed >= cSpeed);
 	return (cSpeed <= speed);
 }
 
@@ -133,13 +136,21 @@ uint8_t get_speed( void )
 
 bool check_speed_difference(int8_t level)
 {
-	//return (level <= cSpeedDiff);
 	return (cSpeedDiff >= level);
 }
 
 int16_t get_speed_different( void )
 {
 	return cSpeedDiff;
+}
+
+bool check_bridge( void )
+{
+	if ((incCounter > 5) && (cSpeed > 0))
+	{
+		return true;
+	}
+	return false;
 }
 
 void handle(int goc)
@@ -181,18 +192,6 @@ void speed(int left, int right)
 		OCR2 = (-right) * 255/100;
 	}
 }
-
-/*
-void fast_brake( void )
-{
-	OCR1B = 20000;
-	sbi(PORTD, DIR00);
-	sbi(PORTD, DIR01);
-	
-	OCR2 = 255;
-	sbi(PORTD, DIR10);
-	sbi(PORTD, DIR11);
-}*/
 
 /* -------------------- LED7 -------------------- */
 void SPI(uint8_t data)
@@ -423,7 +422,7 @@ void sel_mode()
 	
 	while (true)
 	{
-		ratio_base = ratio_default + (get_switch() / 10.0);
+		ratio_base = ratio_default + (get_switch() / 20.0);
 		ratio = ratio_base;
 		led7(ratio_base * 100);
 		delay = (1.4 - 1.125 * ratio);

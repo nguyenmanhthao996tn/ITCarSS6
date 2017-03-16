@@ -123,7 +123,6 @@ void cal_ratio( void )
 
 bool speed_wait(uint8_t speed)
 {
-	//return (speed >= cSpeed);
 	return (cSpeed <= speed);
 }
 
@@ -134,7 +133,6 @@ uint8_t get_speed( void )
 
 bool check_speed_difference(int8_t level)
 {
-	//return (level <= cSpeedDiff);
 	return (cSpeedDiff >= level);
 }
 
@@ -151,6 +149,7 @@ bool check_bridge( void )
 	}
 	return false;
 }
+
 void handle(int goc)
 {
 	if      (goc > SERVO_ANGLE_MAX)  goc =  SERVO_ANGLE_MAX;
