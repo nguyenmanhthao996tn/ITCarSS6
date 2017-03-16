@@ -22,12 +22,19 @@ int main(void)
 	INIT();
 	sel_mode();
 	
-	while (true)
+	if (get_switch2())
 	{
-		sensor_cmp();
-		led7(encoder_pulse);
-		if (get_button(BTN0)) encoder_pulse = 0;
-		if (get_button(BTN1)) break;
+		servo_calibrate();
+	}
+	else
+	{
+		while (true)
+		{
+			sensor_cmp();
+			led7(encoder_pulse);
+			if (get_button(BTN0)) encoder_pulse = 0;
+			if (get_button(BTN1)) break;
+		}	
 	}
 	
 	pattern = 10; /* Chay thang */

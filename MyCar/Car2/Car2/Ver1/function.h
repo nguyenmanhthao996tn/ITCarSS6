@@ -39,7 +39,8 @@
 #define BTN2	0b11110111
 
 /* -------------------- Constants define -------------------- */
-#define SERVO_CENTER       3110
+//#define SERVO_CENTER       3110
+uint16_t SERVO_CENTER = 3110;
 #define STEP			   4
 #define SERVO_ANGLE_MAX    185
 
@@ -84,7 +85,15 @@ uint8_t get_switch()
 {
 	uint8_t x=0;
 	x = ~PINC;
-	x = x & 0x0f;
+	x = x & 0b00000011;
+	return x;
+}
+
+uint8_t get_switch2()
+{
+	uint8_t x=0;
+	x = ~PINC;
+	x = x & 0b00000100;
 	return x;
 }
 
@@ -405,12 +414,12 @@ void servo_calibrate( void )
 		led7((angle>=0)?angle:(-angle));
 		sensor_cmp();
 		handle(angle);
-		if (get_button(BTN0)) break;
-		if (get_button(BTN1)) angle--;
+		if (get_button(BTN0)) angle--;
+		if (get_button(BTN1)) break;
 		if (get_button(BTN2)) angle++;
 	}
 	
-	//SERVO_CENTER = angle;
+	SERVO_CENTER = SERVO_CENTER + (angle * STEP);
 }
 
 /* -------------------- START -------------------- */
