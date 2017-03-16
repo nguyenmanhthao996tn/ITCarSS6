@@ -1,0 +1,211 @@
+﻿#include "helper.h"
+#include "pid.h"
+#include "functions.h"
+#include "special_cases.h"
+
+pidData_t steer;
+void old_school_main();
+void pid_main();
+
+void set_line() {
+	LINE = eeprom_read_word(&eeprom_LINE);
+	if (LINE == 0xffff) {
+		LINE = LINE_DEFAULT;
+	}
+	while (1) {
+		if (get_button(BTN0)) break;
+		if (get_button(BTN1)) LINE -= 10;
+		if (get_button(BTN2)) LINE += 10;
+		set_led_data(LINE);
+	}
+	eeprom_write_word(&eeprom_LINE, LINE);
+}
+
+int main() {
+	init();
+	set_led_data(8888);
+	servo(0);
+	
+	/*
+	while (1) {
+		set_led_data(encoder);
+		if (get_button(BTN0)) break;
+	}*/
+	
+	set_line();
+	isr_ptr = dummy_1;
+	while (1) {
+		if (get_button(BTN0)) {
+			isr_ptr = isr_0;
+			pid_main();
+		}
+		if (get_button(BTN1)) {
+			isr_ptr = isr_1;
+			old_school_main();
+		}
+	}
+}
+
+typedef struct Pid_motor_speed {
+	uint16_t l, r;	
+} pms;
+
+pms pid_motor_speed;
+#define MAX_CTE 300.0
+#define speed_increase_const 1.5
+
+inline void dynamic_speed(uint16_t l, uint16_t r) {
+	pid_motor_speed.l = l;
+	pid_motor_speed.r = r;
+}
+
+#define  DECREASE_SPEED_CONST 5
+void decrease_speed() {
+	pid_motor_speed.l -= DECREASE_SPEED_CONST;
+	pid_motor_speed.r -= DECREASE_SPEED_CONST;
+}
+
+#define PID_SPEED_RATIO 0.3
+inline void calc_motor_speed(int16_t cte) {
+	uint16_t t;
+	
+	if (cte == MAX_CTE) {
+		dynamic_speed(0, motor_speed);
+	} else if (cte == -MAX_CTE) {
+		dynamic_speed(motor_speed, 0);
+	} else if (cte == 0) {
+		dynamic_speed(motor_speed, motor_speed);
+	} else if (cte > 0) {
+		t = (int16_t)(motor_speed * ((MAX_CTE - cte)/MAX_CTE));
+		t = (int16_t)(motor_speed - (PID_SPEED_RATIO*t));
+		dynamic_speed((uint16_t)(t - (cte / 5)), (uint16_t)(t + (cte / 5)));
+	} else if(cte < 0) {
+		t = (int16_t)(motor_speed * ((-MAX_CTE-cte)/-MAX_CTE));
+		t = (int16_t)(motor_speed - (PID_SPEED_RATIO*t));
+		dynamic_speed((uint16_t)(t - (cte / 5)), (uint16_t)(t + (cte / 5)));
+	}
+}
+
+#define NORMAL_TRACE 0
+
+void loop4ever() {
+	while (1);
+}
+
+#define RAMP_CONST 300
+
+void pid_main() {
+	/* PID variables */
+	int16_t cte = 0;
+	int16_t pid_output;
+	uint8_t sensor_val;
+	/* others */
+	uint8_t state = 0;
+	uint16_t first_encoder_read = 0, next_encoder_read;
+	uint16_t delta;
+	
+	test_mode();
+	pid_Init(K_P, K_I, K_D, &steer);
+	
+	set_led_data(1337);
+	dynamic_speed(motor_speed, motor_speed);
+	fwd(pid_motor_speed.l, pid_motor_speed.r);
+	while (1) {
+		//_delay_ms(1000);
+		set_led_data(state);
+		led_data.sensor_debug_output = (switch_lane) | (_90_turn << 7) | (no_line << 6);
+		switch (state) {
+			case 0: //normal trace
+				if (off_lane == 100) {
+					fwd(0, 0);
+					loop4ever();
+				}
+				sensor_val = read_sensor();
+				if (check_crossline(sensor_val)) {
+					off_lane += 1;
+					state = 3;
+				} else if (check_leftline(sensor_val)) {
+					state = 1;
+				} else if (check_rightline(sensor_val)) {
+					state = 2;
+				} else if (check_noline(sensor_val)) {
+					state = 10;
+				} else {
+					cte = calc_cte(sensor_val);
+					/*
+					if (cte < 0) set_led_data(9000 - cte);
+					else set_led_data(cte);
+					*/
+					pid_output = pid_Controller(0, cte, &steer);
+					next_encoder_read = encoder;
+					delta = next_encoder_read - first_encoder_read;
+					first_encoder_read = next_encoder_read;
+					//set_led_data(delta);
+					//if (delta > RAMP_CONST) decrease_speed;	
+					calc_motor_speed(cte);	
+					servo(pid_output/2);	
+					fwd(pid_motor_speed.l, pid_motor_speed.r);
+				}
+			break;
+			
+			case 10: //no line
+				if (switch_lane) {
+					do_switch_lane();
+				} else if (_90_turn) { //it's no line not 90 turn
+					_90_turn = 0;
+				} else if (no_line) {
+					do_noline();
+				}
+				state = NORMAL_TRACE;
+			break;	
+		
+			case 1: //left switch
+				if ( (read_sensor() & MASK0_3) != 0) { //wrong detection between halfline and full line
+					state = 3;
+				} else {
+					if (!_90_turn) { //it's a 90 turn not switch lane
+						switch_lane = 2; //set switch lane flag
+						state = NORMAL_TRACE;
+					} else {
+						no_line = 0;
+						do_90_left_turn();
+						state = NORMAL_TRACE;
+					}
+				}
+			break;
+			
+			case 2: //right switch
+				if ( (read_sensor() & MASK3_0) != 0 ) { //wrong detection between halfline and full line
+					state = 3;
+				} else {
+					if (!_90_turn) {
+						switch_lane = 1; //set switch lane flag
+						state = NORMAL_TRACE;
+					} else {
+						no_line = 0;
+						do_90_right_turn();
+						state = NORMAL_TRACE;
+					}
+				}
+			break;
+			
+			case 3: //crossline detected
+				_delay_ms(50);
+				_90_turn = 1;
+				no_line = 1;
+				fwd(0, 0); //lower speed for 90 degree turn and noline
+				switch_lane = 0;
+				state = NORMAL_TRACE;
+			break;
+		}
+	}	
+}
+
+ISR(TIMER0_COMP_vect) {
+	isr_ptr();
+}
+
+
+ISR(INT0_vect) {
+	encoder += 1;
+} 

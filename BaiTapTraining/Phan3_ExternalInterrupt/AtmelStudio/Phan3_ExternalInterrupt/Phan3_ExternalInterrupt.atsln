@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "ViDu1", "ViDu1\ViDu1.cppproj", "{0C3120BB-F4E8-4E7A-944D-DAD3257E0E56}"
+EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "ViDu2", "ViDu2\ViDu2.cppproj", "{FAB4EA59-6FBF-4181-9BC7-FAE4B8FAE6D7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0C3120BB-F4E8-4E7A-944D-DAD3257E0E56}.Debug|AVR.ActiveCfg = Debug|AVR
+		{0C3120BB-F4E8-4E7A-944D-DAD3257E0E56}.Debug|AVR.Build.0 = Debug|AVR
+		{0C3120BB-F4E8-4E7A-944D-DAD3257E0E56}.Release|AVR.ActiveCfg = Release|AVR
+		{0C3120BB-F4E8-4E7A-944D-DAD3257E0E56}.Release|AVR.Build.0 = Release|AVR
+		{FAB4EA59-6FBF-4181-9BC7-FAE4B8FAE6D7}.Debug|AVR.ActiveCfg = Debug|AVR
+		{FAB4EA59-6FBF-4181-9BC7-FAE4B8FAE6D7}.Debug|AVR.Build.0 = Debug|AVR
+		{FAB4EA59-6FBF-4181-9BC7-FAE4B8FAE6D7}.Release|AVR.ActiveCfg = Release|AVR
+		{FAB4EA59-6FBF-4181-9BC7-FAE4B8FAE6D7}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

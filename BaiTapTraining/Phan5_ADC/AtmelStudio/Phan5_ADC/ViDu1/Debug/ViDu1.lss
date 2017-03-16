@@ -1,0 +1,309 @@
+
+ViDu1.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000001ba  00000000  00000000  00000054  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .comment      00000030  00000000  00000000  0000020e  2**0
+                  CONTENTS, READONLY
+  2 .debug_aranges 00000030  00000000  00000000  0000023e  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  3 .debug_info   00000150  00000000  00000000  0000026e  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  4 .debug_abbrev 000000e3  00000000  00000000  000003be  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_line   000000f1  00000000  00000000  000004a1  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_frame  00000058  00000000  00000000  00000594  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_str    000001ba  00000000  00000000  000005ec  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_loc    0000026b  00000000  00000000  000007a6  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_ranges 00000020  00000000  00000000  00000a11  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 2a 00 	jmp	0x54	; 0x54 <__ctors_end>
+   4:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   8:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  10:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  14:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  18:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  1c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  20:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  24:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  28:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  2c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  30:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  34:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  38:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  3c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  40:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  44:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  48:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  4c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  50:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+
+00000054 <__ctors_end>:
+  54:	11 24       	eor	r1, r1
+  56:	1f be       	out	0x3f, r1	; 63
+  58:	cf e5       	ldi	r28, 0x5F	; 95
+  5a:	d4 e0       	ldi	r29, 0x04	; 4
+  5c:	de bf       	out	0x3e, r29	; 62
+  5e:	cd bf       	out	0x3d, r28	; 61
+  60:	0e 94 bd 00 	call	0x17a	; 0x17a <main>
+  64:	0c 94 db 00 	jmp	0x1b6	; 0x1b6 <_exit>
+
+00000068 <__bad_interrupt>:
+  68:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+0000006c <_Z7displayj>:
+
+#define cbi(port, bit) (port) &= ~(1 << bit)
+#define sbi(port, bit) (port) |= (1 << bit)
+
+void display(uint16_t value)
+{
+  6c:	0f 93       	push	r16
+  6e:	1f 93       	push	r17
+  70:	cf 93       	push	r28
+  72:	df 93       	push	r29
+  74:	ac 01       	movw	r20, r24
+    uint8_t pc = 0, pd = 0;
+    
+    uint16_t temp = value / 1000;
+    uint16_t remain = value % 1000;
+  76:	ec 01       	movw	r28, r24
+  78:	d6 95       	lsr	r29
+  7a:	c7 95       	ror	r28
+  7c:	d6 95       	lsr	r29
+  7e:	c7 95       	ror	r28
+  80:	d6 95       	lsr	r29
+  82:	c7 95       	ror	r28
+  84:	9e 01       	movw	r18, r28
+  86:	a5 ec       	ldi	r26, 0xC5	; 197
+  88:	b0 e2       	ldi	r27, 0x20	; 32
+  8a:	0e 94 cc 00 	call	0x198	; 0x198 <__umulhisi3>
+  8e:	fc 01       	movw	r30, r24
+  90:	f2 95       	swap	r31
+  92:	e2 95       	swap	r30
+  94:	ef 70       	andi	r30, 0x0F	; 15
+  96:	ef 27       	eor	r30, r31
+  98:	ff 70       	andi	r31, 0x0F	; 15
+  9a:	ef 27       	eor	r30, r31
+  9c:	28 ee       	ldi	r18, 0xE8	; 232
+  9e:	33 e0       	ldi	r19, 0x03	; 3
+  a0:	e2 9f       	mul	r30, r18
+  a2:	c0 01       	movw	r24, r0
+  a4:	e3 9f       	mul	r30, r19
+  a6:	90 0d       	add	r25, r0
+  a8:	f2 9f       	mul	r31, r18
+  aa:	90 0d       	add	r25, r0
+  ac:	11 24       	eor	r1, r1
+  ae:	fa 01       	movw	r30, r20
+  b0:	e8 1b       	sub	r30, r24
+  b2:	f9 0b       	sbc	r31, r25
+    pd |= (temp & 0x0f) << 4;
+    
+    temp = remain / 100;
+    remain = remain % 100;
+  b4:	8f 01       	movw	r16, r30
+  b6:	16 95       	lsr	r17
+  b8:	07 95       	ror	r16
+  ba:	16 95       	lsr	r17
+  bc:	07 95       	ror	r16
+  be:	98 01       	movw	r18, r16
+  c0:	ab e7       	ldi	r26, 0x7B	; 123
+  c2:	b4 e1       	ldi	r27, 0x14	; 20
+  c4:	0e 94 cc 00 	call	0x198	; 0x198 <__umulhisi3>
+  c8:	ac 01       	movw	r20, r24
+  ca:	56 95       	lsr	r21
+  cc:	47 95       	ror	r20
+  ce:	24 e6       	ldi	r18, 0x64	; 100
+  d0:	24 9f       	mul	r18, r20
+  d2:	c0 01       	movw	r24, r0
+  d4:	25 9f       	mul	r18, r21
+  d6:	90 0d       	add	r25, r0
+  d8:	11 24       	eor	r1, r1
+  da:	af 01       	movw	r20, r30
+  dc:	48 1b       	sub	r20, r24
+  de:	59 0b       	sbc	r21, r25
+    
+    uint16_t temp = value / 1000;
+    uint16_t remain = value % 1000;
+    pd |= (temp & 0x0f) << 4;
+    
+    temp = remain / 100;
+  e0:	98 01       	movw	r18, r16
+  e2:	0e 94 cc 00 	call	0x198	; 0x198 <__umulhisi3>
+  e6:	96 95       	lsr	r25
+  e8:	87 95       	ror	r24
+    remain = remain % 100;
+    pd |= temp & 0x0f;
+  ea:	e8 2f       	mov	r30, r24
+  ec:	ef 70       	andi	r30, 0x0F	; 15
+
+void display(uint16_t value)
+{
+    uint8_t pc = 0, pd = 0;
+    
+    uint16_t temp = value / 1000;
+  ee:	9e 01       	movw	r18, r28
+  f0:	a5 ec       	ldi	r26, 0xC5	; 197
+  f2:	b0 e2       	ldi	r27, 0x20	; 32
+  f4:	0e 94 cc 00 	call	0x198	; 0x198 <__umulhisi3>
+  f8:	92 95       	swap	r25
+  fa:	82 95       	swap	r24
+  fc:	8f 70       	andi	r24, 0x0F	; 15
+  fe:	89 27       	eor	r24, r25
+ 100:	9f 70       	andi	r25, 0x0F	; 15
+ 102:	89 27       	eor	r24, r25
+    uint16_t remain = value % 1000;
+    pd |= (temp & 0x0f) << 4;
+ 104:	82 95       	swap	r24
+ 106:	80 7f       	andi	r24, 0xF0	; 240
+    
+    temp = remain / 100;
+    remain = remain % 100;
+    pd |= temp & 0x0f;
+ 108:	e8 2b       	or	r30, r24
+    
+    temp = remain / 10;
+    remain = remain % 10;
+ 10a:	9a 01       	movw	r18, r20
+ 10c:	ad ec       	ldi	r26, 0xCD	; 205
+ 10e:	bc ec       	ldi	r27, 0xCC	; 204
+ 110:	0e 94 cc 00 	call	0x198	; 0x198 <__umulhisi3>
+ 114:	96 95       	lsr	r25
+ 116:	87 95       	ror	r24
+ 118:	96 95       	lsr	r25
+ 11a:	87 95       	ror	r24
+ 11c:	96 95       	lsr	r25
+ 11e:	87 95       	ror	r24
+ 120:	9c 01       	movw	r18, r24
+ 122:	22 0f       	add	r18, r18
+ 124:	33 1f       	adc	r19, r19
+ 126:	88 0f       	add	r24, r24
+ 128:	99 1f       	adc	r25, r25
+ 12a:	88 0f       	add	r24, r24
+ 12c:	99 1f       	adc	r25, r25
+ 12e:	88 0f       	add	r24, r24
+ 130:	99 1f       	adc	r25, r25
+ 132:	82 0f       	add	r24, r18
+ 134:	93 1f       	adc	r25, r19
+ 136:	9a 01       	movw	r18, r20
+ 138:	28 1b       	sub	r18, r24
+ 13a:	39 0b       	sbc	r19, r25
+    pc |= ((temp & 0x0f) << 4) | (remain & 0x0f);
+ 13c:	f2 2f       	mov	r31, r18
+ 13e:	ff 70       	andi	r31, 0x0F	; 15
+    
+    temp = remain / 100;
+    remain = remain % 100;
+    pd |= temp & 0x0f;
+    
+    temp = remain / 10;
+ 140:	9a 01       	movw	r18, r20
+ 142:	0e 94 cc 00 	call	0x198	; 0x198 <__umulhisi3>
+ 146:	96 95       	lsr	r25
+ 148:	87 95       	ror	r24
+ 14a:	96 95       	lsr	r25
+ 14c:	87 95       	ror	r24
+ 14e:	96 95       	lsr	r25
+ 150:	87 95       	ror	r24
+    remain = remain % 10;
+    pc |= ((temp & 0x0f) << 4) | (remain & 0x0f);
+ 152:	82 95       	swap	r24
+ 154:	80 7f       	andi	r24, 0xF0	; 240
+ 156:	f8 2b       	or	r31, r24
+    
+    PORTC = pc;
+ 158:	f5 bb       	out	0x15, r31	; 21
+    PORTD = pd;
+ 15a:	e2 bb       	out	0x12, r30	; 18
+}
+ 15c:	df 91       	pop	r29
+ 15e:	cf 91       	pop	r28
+ 160:	1f 91       	pop	r17
+ 162:	0f 91       	pop	r16
+ 164:	08 95       	ret
+
+00000166 <_Z8adc_readh>:
+
+uint16_t adc_read(uint8_t channel)
+{
+    ADMUX = channel | (ADMUX & 0xf0);
+ 166:	97 b1       	in	r25, 0x07	; 7
+ 168:	90 7f       	andi	r25, 0xF0	; 240
+ 16a:	89 2b       	or	r24, r25
+ 16c:	87 b9       	out	0x07, r24	; 7
+    ADCSRA|=(1<<ADSC);
+ 16e:	36 9a       	sbi	0x06, 6	; 6
+    while(!(ADCSRA & (1<<ADIF)));
+ 170:	34 9b       	sbis	0x06, 4	; 6
+ 172:	fe cf       	rjmp	.-4      	; 0x170 <_Z8adc_readh+0xa>
+    return ADCW;
+ 174:	84 b1       	in	r24, 0x04	; 4
+ 176:	95 b1       	in	r25, 0x05	; 5
+}
+ 178:	08 95       	ret
+
+0000017a <main>:
+
+int main(void)
+{
+    // Khởi tạo chân ra Led7
+    DDRC = 0xff;
+ 17a:	8f ef       	ldi	r24, 0xFF	; 255
+ 17c:	84 bb       	out	0x14, r24	; 20
+    PORTC = 0;
+ 17e:	15 ba       	out	0x15, r1	; 21
+    DDRD = 0xff;
+ 180:	81 bb       	out	0x11, r24	; 17
+    PORTD = 0;
+ 182:	12 ba       	out	0x12, r1	; 18
+    
+    // Khoi tao ADC
+    ADMUX |= (1 << REFS0);                                              // Chon dien ap tham chieu tu chan AREF
+ 184:	3e 9a       	sbi	0x07, 6	; 7
+    ADCSRA |= (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // Cho phep ADC hoat dong, prescale = 128
+ 186:	86 b1       	in	r24, 0x06	; 6
+ 188:	87 68       	ori	r24, 0x87	; 135
+ 18a:	86 b9       	out	0x06, r24	; 6
+    
+    while(1)
+    {
+        //TODO:: Please write your application code
+        display(adc_read(1));
+ 18c:	81 e0       	ldi	r24, 0x01	; 1
+ 18e:	0e 94 b3 00 	call	0x166	; 0x166 <_Z8adc_readh>
+ 192:	0e 94 36 00 	call	0x6c	; 0x6c <_Z7displayj>
+ 196:	fa cf       	rjmp	.-12     	; 0x18c <main+0x12>
+
+00000198 <__umulhisi3>:
+ 198:	a2 9f       	mul	r26, r18
+ 19a:	b0 01       	movw	r22, r0
+ 19c:	b3 9f       	mul	r27, r19
+ 19e:	c0 01       	movw	r24, r0
+ 1a0:	a3 9f       	mul	r26, r19
+ 1a2:	70 0d       	add	r23, r0
+ 1a4:	81 1d       	adc	r24, r1
+ 1a6:	11 24       	eor	r1, r1
+ 1a8:	91 1d       	adc	r25, r1
+ 1aa:	b2 9f       	mul	r27, r18
+ 1ac:	70 0d       	add	r23, r0
+ 1ae:	81 1d       	adc	r24, r1
+ 1b0:	11 24       	eor	r1, r1
+ 1b2:	91 1d       	adc	r25, r1
+ 1b4:	08 95       	ret
+
+000001b6 <_exit>:
+ 1b6:	f8 94       	cli
+
+000001b8 <__stop_program>:
+ 1b8:	ff cf       	rjmp	.-2      	; 0x1b8 <__stop_program>
