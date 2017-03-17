@@ -186,7 +186,6 @@ int main(void)
 			/* Lech trai goc lon */
 			case 12:
 				led7(12);
-				set_encoder(10);
 				switch(sensor_cmp() & 0b00110011)
 				{
 					case 0b00000011:

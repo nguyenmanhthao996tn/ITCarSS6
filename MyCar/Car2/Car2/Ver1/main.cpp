@@ -14,14 +14,13 @@ bool check_leftline( void );
 uint8_t pattern = 10;
 uint8_t sensor = 0x00;
 uint16_t timer_cnt, encoder_pulse;
+uint16_t bridgeCounter = 0;
 
-int16_t tmp = 0, tmp2;
 
 int main(void)
 {
 	INIT();
 	sel_mode();
-	
 	if (get_switch2())
 	{
 		servo_calibrate();
@@ -38,7 +37,6 @@ int main(void)
 	}
 	
 	pattern = 10; /* Chay thang */
-	set_encoder(-1);
 	
     while (true)
     {
@@ -47,7 +45,7 @@ int main(void)
 			/* Chay thang */
 			case 10:
 				led7(10);
-				
+				set_encoder(12);
 				if (check_crossline())     /* Cua vuong */
 				{
 					pattern = 21;
@@ -66,6 +64,10 @@ int main(void)
 					timer_cnt = 0;
 					encoder_pulse = 0;
 					break;
+				}
+				if ((get_speed() > 8) && (bridgeCounter > 500))
+				{
+					pattern = 99;
 				}
 				
 				switch (sensor_cmp() & 0b01111110)
@@ -134,32 +136,35 @@ int main(void)
 			/* Lech phai goc lon */
 			case 11:
 				led7(11);
-				set_encoder(12);
 				switch (sensor_cmp() & 0b11001100)
 				{
 					case 0b11000000:
+						set_encoder(6);
 						speed(80, /*0*/-10);
-						handle(105);
+						handle(135);
 					break;
 					
 					case 0b10000000:
+						set_encoder(6);
 						speed(80, /*15*/5);
-						handle(90);
+						handle(120);
 					break;
 					
 					case 0b00000000:
+						set_encoder(8);
 						speed(80, /*20*/10);
-						handle(78);
+						handle(90);
 					break;
 					
 					case 0b00000100:
+						set_encoder(10);
 						speed(80, /*25*/15);
-						handle(60);
+						handle(70);
 					break;
 					
 					case 0b00001100:
 						speed(80, /*30*/20);
-						handle(52);
+						handle(55);
 						pattern = 10;
 						set_encoder(-1);
 					break;
@@ -177,33 +182,37 @@ int main(void)
 			/* Lech trai goc lon */
 			case 12:
 				led7(12);
-				set_encoder(12);
 				switch(sensor_cmp() & 0b00110011)
 				{
 					case 0b00000011:
+						set_encoder(6);
 						speed(-10,80);
-						handle(-105);
+						handle(-135);
 					break;
 					
 					case 0b00000001:
+						set_encoder(6);
 						speed(5,80);
-						handle(-90);
+						handle(-120);
 					break;
 					
 					case 0b00000000:
+						set_encoder(8);	
 						speed(10,80);
-						handle(-78);
+						handle(-90);
 					break;
 					
 					case 0b00100000:
+						set_encoder(10);
 						speed(15,80);
-						handle(-60);
+						handle(-70);
 					break;
 					
 					case 0b00110000:
 						speed(20,80);
-						handle(-52);
+						handle(-55);
 						pattern = 10;
+						set_encoder(-1);
 					break;
 					
 					case 0b00000110:
@@ -231,9 +240,10 @@ int main(void)
 				led7(22);
 				
 				//if( timer_cnt > (285 - (delay * 200)) || encoder_pulse > 35 )
-				if (speed_wait(2))
+				if (speed_wait(3))
 				{
-					speed(50, 50);
+					set_encoder(10);
+					speed(70, 70);
 					pattern = 23;
 					timer_cnt = 0;
 					encoder_pulse = 0;
@@ -305,6 +315,7 @@ int main(void)
 				/* Cua trai */
 				if ((encoder_pulse > 12) && (((sensor & 0b11111000) == 0b11111000) || ((sensor & 0b11110000) == 0b11110000) || ((sensor & 0b11100000) == 0b11100000) || ((sensor & 0b11111100) == 0b11111100)))	/* Neu gap tin hieu nay la goc cua 90 trai thi be */
 				{
+					set_encoder(-1);
 					pattern = 26;
 					timer_cnt=0;
 					encoder_pulse = 0;
@@ -313,6 +324,7 @@ int main(void)
 				/* Cua phai */
 				if ((encoder_pulse > 12) && (((sensor & 0b00011111) == 0b00011111 ) || ((sensor & 0b00000111) == 0b00000111) || ((sensor & 0b00001111) == 0b00001111) || ((sensor & 0b00111111) == 0b00111111))) /* Neu gap tin hieu nay la goc cua 90 phai thi be */
 				{
+					set_encoder(-1);
 					pattern = 27;
 					timer_cnt=0;
 					encoder_pulse = 0;
@@ -391,7 +403,7 @@ int main(void)
 				led7(26);
 				
 				handle(-SERVO_ANGLE_MAX); /* -120 */
-				speed( -100 , 80 );
+				speed( -80 , 80 );
 				pattern = 31;
 				timer_cnt = 0;
 				encoder_pulse = 0;
@@ -401,7 +413,7 @@ int main(void)
 				led7(27);
 				
 				handle(SERVO_ANGLE_MAX); /* 120 */
-				speed( 80 , -100 );
+				speed( 80 , -80 );
 				pattern = 41;
 				timer_cnt = 0;
 				encoder_pulse = 0;
@@ -449,7 +461,7 @@ int main(void)
 			/* Chuyen lan trai */
 			case 51:
 				led7(51);
-				
+				set_encoder(8);
 				sensor = sensor_cmp();
 				if (((sensor & 0b00000111) == 0b00000111) || ((sensor & 0b00001111) == 0b00001111) || ((sensor & 0b00011111) == 0b00011111))
 				{
@@ -457,7 +469,7 @@ int main(void)
 					break;
 				}
 				
-				speed(100, 100);
+				speed(50, 50);
 				
 				if (encoder_pulse >= 25 || timer_cnt >= 120)
 				{
@@ -465,13 +477,71 @@ int main(void)
 					timer_cnt = 0;
 					encoder_pulse=0;
 				}
+				
+				/* Nguoc lai thi chinh thang cho xe */
+				switch (sensor_cmp() & 0b01111110)
+				{
+					case 0b01111110:
+					break;
+					
+					case 0b00011000: /* Chay thang */
+					handle(0);
+					break;
+					
+					case 0b00011100:
+					case 0b00001000:
+					handle(9);
+					break;
+					
+					case 0b00001100:
+					handle(17);
+					break;
+					
+					case 0b00001110:
+					case 0b00000100:
+					handle(31);
+					break;
+					
+					case 0b00000110:
+					handle(50);
+					break;
+					
+					case 0b00000010:
+					handle(75);
+					break;
+					
+					case 0b00111000:
+					case 0b00010000:
+					handle(-9);
+					break;
+					
+					case 0b00110000:
+					handle(-17);
+					break;
+					
+					case 0b01110000:
+					case 0b00100000:
+					handle(-31);
+					break;
+					
+					case 0b01100000:
+					handle(-50);
+					break;
+					
+					case 0b01000000:
+					handle(-75);
+					break;
+					
+					default:
+					break;
+				}
 			break; /* case 51 */
 			
 			case 52:
 				led7(52);
 				
 				handle(-50);
-				speed( 80 ,100 );
+				speed( 35 ,50 );
 				pattern = 53;
 				timer_cnt = 0;
 				encoder_pulse = 0;
@@ -481,23 +551,29 @@ int main(void)
 				led7(53);
 				
 				sensor = sensor_cmp();
-				if(((encoder_pulse > 100) || (timer_cnt > 200 * delay)) && ((sensor & 0b00110000 ) == 0b00110000))
+				if(((encoder_pulse > 75) || (timer_cnt > 175 * delay)) && ((sensor & 0b00110000 ) == 0b00110000))
 				{
 					pattern = 10;
+					set_encoder(-1);
+					
+					handle(35);
+					speed(100, 70);
 				}
 			break; /* case 53 */
 			
 			/* Chuyen lan phai */
 			case 61:
 				led7(61);
+				set_encoder(8);
 				sensor = sensor_cmp();
 				if (((sensor & 0b11100000) == 0b11100000) || ((sensor & 0b11110000) == 0b11110000) || ((sensor & 0b11111000) == 0b11111000))
 				{
-					pattern = 21 ;
+					pattern = 21;
+					set_encoder(-1);
 					break;
 				}
 				
-				speed(100, 100);
+				speed(50, 50);
 				
 				if (encoder_pulse >= 25 || timer_cnt >= 120)
 				{
@@ -505,12 +581,70 @@ int main(void)
 					timer_cnt = 0;
 					encoder_pulse=0;
 				}
+				
+				/* Nguoc lai thi chinh thang cho xe */
+				switch (sensor_cmp() & 0b01111110)
+				{
+					case 0b01111110:
+					break;
+					
+					case 0b00011000: /* Chay thang */
+					handle(0);
+					break;
+					
+					case 0b00011100:
+					case 0b00001000:
+					handle(9);
+					break;
+					
+					case 0b00001100:
+					handle(17);
+					break;
+					
+					case 0b00001110:
+					case 0b00000100:
+					handle(31);
+					break;
+					
+					case 0b00000110:
+					handle(50);
+					break;
+					
+					case 0b00000010:
+					handle(75);
+					break;
+					
+					case 0b00111000:
+					case 0b00010000:
+					handle(-9);
+					break;
+					
+					case 0b00110000:
+					handle(-17);
+					break;
+					
+					case 0b01110000:
+					case 0b00100000:
+					handle(-31);
+					break;
+					
+					case 0b01100000:
+					handle(-50);
+					break;
+					
+					case 0b01000000:
+					handle(-75);
+					break;
+					
+					default:
+					break;
+				}
 			break; /* case 61 */
 			
 			case 62:
 				led7(62);
 				
-				handle(50);
+				handle(35);
 				speed( 100 ,80 );
 				pattern = 63;
 				timer_cnt = 0;
@@ -521,9 +655,13 @@ int main(void)
 				led7(63);
 				
 				sensor = sensor_cmp();
-				if(((encoder_pulse > 100) || (timer_cnt > 200 * delay)) && ((sensor & 0b00110000 ) == 0b00110000))
+				if(((encoder_pulse > 75) || (timer_cnt > 175 * delay)) && ((sensor & 0b00001100 ) == 0b00001100))
 				{
 					pattern = 10;
+					set_encoder(-1);
+					
+					handle(-40);
+					speed(70, 100);
 				}
 			break; /* case 63 */
 			
@@ -544,8 +682,78 @@ int main(void)
 			}
 			break; /* case 73 */
 			
-			default:
+			/* Bridge */
+			case 99:
+			led7(99);
+			speed(-50, -50);
+			
+			/* Nguoc lai thi chinh thang cho xe */
+			switch (sensor_cmp() & 0b01111110)
+			{
+				case 0b01111110:
+				break;
+				
+				case 0b00011000: /* Chay thang */
+				handle(0);
+				break;
+				
+				case 0b00011100:
+				case 0b00001000:
+				handle(9);
+				break;
+				
+				case 0b00001100:
+				handle(17);
+				break;
+				
+				case 0b00001110:
+				case 0b00000100:
+				handle(31);
+				break;
+				
+				case 0b00000110:
+				handle(50);
+				break;
+				
+				case 0b00000010:
+				handle(75);
+				break;
+				
+				case 0b00111000:
+				case 0b00010000:
+				handle(-9);
+				break;
+				
+				case 0b00110000:
+				handle(-17);
+				break;
+				
+				case 0b01110000:
+				case 0b00100000:
+				handle(-31);
+				break;
+				
+				case 0b01100000:
+				handle(-50);
+				break;
+				
+				case 0b01000000:
+				handle(-75);
+				break;
+				
+				default:
+				break;
+			}
+			
+			if (speed_wait(3))
+			{
+				speed(70, 70);
 				pattern = 10;
+			};
+			break; /* case 99 */
+			
+			default:
+			pattern = 10;
 			break; /* default */
 		}
     }
@@ -562,6 +770,8 @@ ISR(INT0_vect) /* encoder */
 {
 	encoder_pulse++;
 	pulse_ratio++;
+	if (pattern == 10) bridgeCounter++;
+	else bridgeCounter = 0;
 }
 
 bool check_crossline( void )
@@ -572,10 +782,10 @@ bool check_crossline( void )
 bool check_rightline( void )
 {
 	sensor = sensor_cmp();
-	return (((sensor & 0b00001111) == 0b00001111) || ((sensor & 0b00011111) == 0b00011111));
+	return (((sensor & 0b00001111) == 0b00001111) || ((sensor & 0b00011111) == 0b00011111) || ((sensor & 0b00000111) == 0b00000111));
 }
 bool check_leftline( void )
 {
 	sensor = sensor_cmp();
-	return (((sensor & 0b11110000) == 0b11110000) || ((sensor & 0b11111000) == 0b11111000));
+	return (((sensor & 0b11110000) == 0b11110000) || ((sensor & 0b11111000) == 0b11111000) || ((sensor & 0b11100000) == 0b11100000));
 }
