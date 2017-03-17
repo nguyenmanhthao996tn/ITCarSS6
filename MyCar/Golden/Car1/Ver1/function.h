@@ -38,7 +38,8 @@
 #define BTN2	0b11110111
 
 /* -------------------- Constants define -------------------- */
-#define  SERVO_CENTER      3100
+//#define  SERVO_CENTER      3100
+uint16_t SERVO_CENTER   =  3070;
 #define  STEP			   4
 #define  SERVO_ANGLE_MAX   125
 
@@ -58,7 +59,7 @@ struct led7 {
 } led7_data;
 
 /* -------------------- Ratio variable -------------------- */
-#define ratio_default 0.15
+#define ratio_default 0.30
 int16_t velocity;
 uint8_t cnt_ratio;
 int16_t pulse_ratio;
@@ -83,7 +84,15 @@ uint8_t get_switch()
 {
 	uint8_t x=0;
 	x = ~PINC;
-	x = x & 0x0f;
+	x = x & 0x07;
+	return x;
+}
+
+uint8_t get_switch2()
+{
+	uint8_t x=0;
+	x = ~PINC;
+	x = x & 0x08;
 	return x;
 }
 
@@ -104,8 +113,10 @@ void cal_ratio( void )
 		}
 		else
 		{
-			if      (pulse_ratio < (velocity / 2))     ratio = ratio_base + 0.25;
-			else if (pulse_ratio > velocity)           ratio = ratio_base - 0.3;
+			if      (pulse_ratio < velocity / 2)    ratio = ratio_base + 0.3;
+			else if (pulse_ratio < velocity)        ratio = ratio_base + 0.1;
+			else if (pulse_ratio > velocity)        ratio = ratio_base - 0.35;
+			else if (pulse_ratio > velocity / 2)    ratio = ratio_base - 0.25;
 			else ratio = ratio_base;
 			
 			if (ratio <= 0) ratio = 0.1;
@@ -409,12 +420,12 @@ void servo_calibrate( void )
 		led7((angle>=0)?angle:(-angle));
 		sensor_cmp();
 		handle(angle);
-		if (get_button(BTN0)) break;
-		if (get_button(BTN1)) angle--;
+		if (get_button(BTN0)) angle--;
+		if (get_button(BTN1)) break;;
 		if (get_button(BTN2)) angle++;
 	}
 	
-	//SERVO_CENTER = angle;
+	SERVO_CENTER = SERVO_CENTER + (angle * STEP);
 }
 
 /* -------------------- START -------------------- */
@@ -426,13 +437,13 @@ void sel_mode()
 	
 	while(1)
 	{
-		ratio_base = ratio_default + (get_switch() / 10.0);
+		ratio_base = ratio_default + (get_switch() / 20.0);
 		ratio = ratio_base;
 		led7(ratio_base * 100);
 		delay = (1.4 - 1.125 * ratio);
 		sensor_cmp();
 		if(get_button(BTN0))		return;
-		else if (get_button(BTN1))	/*test_hardware();*/ test_servo();
+		else if (get_button(BTN1))	test_hardware(); /*test_servo();*/
 		else if (get_button(BTN2))	learn_color();
 	}
 }

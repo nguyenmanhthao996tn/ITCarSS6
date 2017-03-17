@@ -21,13 +21,20 @@ int main(void)
 {
 	INIT();
 	sel_mode();
-	
-	while (true)
+	set_encoder(15);
+	if (get_switch2())
 	{
-		sensor_cmp();
-		led7(encoder_pulse);
-		if (get_button(BTN0)) encoder_pulse = 0;
-		if (get_button(BTN1)) break;
+		servo_calibrate();
+	}
+	else
+	{
+		while (true)
+		{
+			sensor_cmp();
+			led7(encoder_pulse);
+			if (get_button(BTN0)) encoder_pulse = 0;
+			if (get_button(BTN1)) break;
+		}
 	}
 	
 	pattern = 10; /* Chay thang */
@@ -39,7 +46,7 @@ int main(void)
 			/* Chay thang */
 			case 10:
 				led7(10);
-				
+				set_encoder(-1);
 				if (check_crossline())     /* Cua vuong */
 				{
 					pattern = 21;
@@ -126,25 +133,28 @@ int main(void)
 			/* Lech phai goc lon */
 			case 11:
 				led7(11);
-				set_encoder(12);
 				switch (sensor_cmp() & 0b11001100)
 				{
 					case 0b11000000:
+						set_encoder(6/*5*/);
 						speed(80, /*0*/-10);
 						handle(115/*95*/ + addition_handle);/* sua 95 */
 					break;
 					
 					case 0b10000000:
+						set_encoder(6/*5*/);
 						speed(80, /*15*/5);
 						handle(100/*80*/ + addition_handle);/* sua 80*/
 					break;
 					
 					case 0b00000000:
+						set_encoder(8/*7*/);
 						speed(80, /*20*/10);
 						handle(78/*68*/ + addition_handle);
 					break;
 					
 					case 0b00000100:
+						set_encoder(10/*9*/);
 						speed(80, /*25*/15);
 						handle(60/*50*/ + addition_handle);
 					break;
@@ -169,25 +179,29 @@ int main(void)
 			/* Lech trai goc lon */
 			case 12:
 				led7(12);
-				set_encoder(12);
+				set_encoder(10);
 				switch(sensor_cmp() & 0b00110011)
 				{
 					case 0b00000011:
+						speed_wait(5);
 						speed(/*0*/-10,80);
 						handle(-115/*-95*/ - addition_handle);/*sua -95*/
 					break;
 					
 					case 0b00000001:
+						speed_wait(5);
 						speed(/*15*/5,80);
 						handle(/*-80*/-100 - addition_handle);/*sua -80*/
 					break;
 					
 					case 0b00000000:
+						set_encoder(8/*7*/);
 						speed(/*20*/10,80);
 						handle(/*-68*/-78 - addition_handle);
 					break;
 					
 					case 0b00100000:
+						set_encoder(10/*9*/);
 						speed(/*25*/15,80);
 						handle(/*-50*/-60 - addition_handle);
 					break;
@@ -224,9 +238,10 @@ int main(void)
 				led7(22);
 				
 				//if( timer_cnt > (300 - (delay * 200)) || encoder_pulse > 20 )
-				if (speed_wait(2)) /*important*/
+				if (speed_wait(3)) /*important*/
 				{
-					speed(50, 50);
+					set_encoder(10);
+					speed(70, 70);
 					pattern = 23;
 					timer_cnt = 0;
 					encoder_pulse = 0;
@@ -289,6 +304,7 @@ int main(void)
 				/* Cua trai */
 				if(((encoder_pulse > 5) /*|| (timer_cnt > 150)*/) &&(((sensor & 0b11111000) == 0b11111000)  || ((sensor & 0b11110000) == 0b11110000) || ((sensor & 0b11100000) == 0b11100000)))	/* Neu gap tin hieu nay la goc cua 90 trai thi be */
 				{
+					set_encoder(-1);
 					pattern = 26;
 					timer_cnt=0;
 					break;
@@ -296,6 +312,7 @@ int main(void)
 				/* Cua phai */
 				if(((encoder_pulse > 5) /*|| (timer_cnt > 150)*/) && (((sensor & 0b00011111) == 0b00011111 ) ||((sensor & 0b00000111) == 0b00000111) || ((sensor & 0b00001111) == 0b00001111))) /* Neu gap tin hieu nay la goc cua 90 phai thi be */
 				{
+					set_encoder(-1);
 					pattern = 27;
 					timer_cnt=0;
 					break;
@@ -376,7 +393,7 @@ int main(void)
 				led7(26);
 				
 				handle( -150  - addition_handle); /* -120 */
-				speed( -100 , 80 );
+				speed( -80 , 80 );
 				pattern = 31;
 				timer_cnt = 0;
 				encoder_pulse = 0;
@@ -386,7 +403,7 @@ int main(void)
 				led7(27);
 				
 				handle( 150  + addition_handle); /* 120 */
-				speed( 80 , -100 );
+				speed( 80 , -80 );
 				pattern = 41;
 				timer_cnt = 0;
 				encoder_pulse = 0;
@@ -434,15 +451,16 @@ int main(void)
 			/* Chuyen lan trai */
 			case 51:
 				led7(51);
-				
+				set_encoder(10);
 				sensor = sensor_cmp();
 				if (((sensor & 0b00000111) == 0b00000111) || ((sensor & 0b00001111) == 0b00001111) || ((sensor & 0b00011111) == 0b00011111))
 				{
 					pattern = 21;
+					set_encoder(-1);
 					break;
 				}
 				
-				speed(70, 70);
+				speed(50, 50);
 				
 				if (encoder_pulse >= 25 || timer_cnt >= 120)
 				{
@@ -455,8 +473,8 @@ int main(void)
 			case 52:
 				led7(52);
 				
-				handle(-25);
-				speed( 80 ,100 );
+				handle(-30);
+				speed( 35 ,50 );
 				pattern = 53;
 				timer_cnt = 0;
 				encoder_pulse = 0;
@@ -469,20 +487,26 @@ int main(void)
 				if(((encoder_pulse > 100) || (timer_cnt > 200 * delay)) && ((sensor & 0b00110000 ) == 0b00110000))
 				{
 					pattern = 10;
+					set_encoder(-1);
+					
+					handle(40);
+					speed(100, 70);
 				}
 			break; /* case 53 */
 			
 			/* Chuyen lan phai */
 			case 61:
 				led7(61);
+				set_encoder(10);
 				sensor = sensor_cmp();
 				if (((sensor & 0b11100000) == 0b11100000) || ((sensor & 0b11100000) == 0b11100000) || ((sensor & 0b11111000) == 0b11111000))
 				{
-					pattern = 21 ;
+					pattern = 21;
+					set_encoder(-1);
 					break;
 				}
 				
-				speed(70, 70);
+				speed(50, 50);
 				
 				if (encoder_pulse >= 25 || timer_cnt >= 120)
 				{
@@ -495,8 +519,8 @@ int main(void)
 			case 62:
 				led7(62);
 				
-				handle(25);
-				speed( 100 ,80 );
+				handle(35);
+				speed(50 ,35);
 				pattern = 63;
 				timer_cnt = 0;
 				encoder_pulse = 0;
@@ -509,6 +533,10 @@ int main(void)
 				if(((encoder_pulse > 100) || (timer_cnt > 200 * delay)) && ((sensor & 0b00110000 ) == 0b00110000))
 				{
 					pattern = 10;
+					set_encoder(-1);
+					
+					handle(-40);
+					speed(70, 100);
 				}
 			break; /* case 63 */
 			
