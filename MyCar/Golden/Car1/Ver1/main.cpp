@@ -16,6 +16,7 @@ bool check_leftline( void );
 uint8_t pattern = 10;
 uint8_t sensor = 0x00;
 uint16_t timer_cnt, encoder_pulse;
+uint16_t bridgeCounter = 0;
 
 int main(void)
 {
@@ -46,7 +47,7 @@ int main(void)
 			/* Chay thang */
 			case 10:
 				led7(10);
-				set_encoder(-1);
+				set_encoder(12);
 				if (check_crossline())     /* Cua vuong */
 				{
 					pattern = 21;
@@ -65,6 +66,11 @@ int main(void)
 					timer_cnt = 0;
 					encoder_pulse = 0;
 					break;
+				}
+				
+				if ((get_speed() > 9))
+				{
+					pattern = 99;
 				}
 				
 				switch (sensor_cmp() & 0b01111110)
@@ -557,7 +563,17 @@ int main(void)
 				set_encoder(-1);
 			}
 			break; /* case 73 */
-			
+		
+			/* Bridge */
+			case 99:
+				led7(99);
+				speed(-100, -100);
+				if (speed_wait(0))
+				{
+					pattern = 10;
+				};
+			break; /* case 99 */
+				
 			default:
 				pattern = 10;
 			break; /* default */
@@ -576,6 +592,8 @@ ISR(INT0_vect)
 {
 	encoder_pulse++;
 	pulse_ratio++;
+	if (pattern == 10) bridgeCounter++;
+	else bridgeCounter = 0;
 }
 
 bool check_crossline( void )

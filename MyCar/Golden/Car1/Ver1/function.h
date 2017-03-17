@@ -123,8 +123,6 @@ void cal_ratio( void )
 		}
 		
 		cSpeedDiff = pulse_ratio - cSpeed;
-		if (cSpeedDiff > 0) incCounter++;
-		else incCounter = 0;
 		cSpeed = pulse_ratio;
 		
 		pulse_ratio = 0;
