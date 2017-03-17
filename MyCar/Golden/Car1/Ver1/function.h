@@ -39,7 +39,7 @@
 
 /* -------------------- Constants define -------------------- */
 //#define  SERVO_CENTER      3100
-uint16_t SERVO_CENTER   =  3070;
+uint16_t SERVO_CENTER   =  3000;
 #define  STEP			   4
 #define  SERVO_ANGLE_MAX   125
 

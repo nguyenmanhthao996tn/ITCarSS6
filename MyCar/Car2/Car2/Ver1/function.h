@@ -40,9 +40,9 @@
 
 /* -------------------- Constants define -------------------- */
 //#define SERVO_CENTER       3110
-uint16_t SERVO_CENTER = 3110;
-#define STEP			   4
-#define SERVO_ANGLE_MAX    185
+uint16_t SERVO_CENTER = 3005;
+#define STEP			   5
+#define SERVO_ANGLE_MAX    155
 
 /* -------------------- ADC variable -------------------- */
 uint16_t ADC_average[8];

@@ -12,6 +12,7 @@
 bool check_crossline( void );
 bool check_rightline( void );
 bool check_leftline( void );
+inline void center_no_speed( void );
 
 uint8_t pattern = 10;
 uint8_t sensor = 0x00;
@@ -68,7 +69,7 @@ int main(void)
 					break;
 				}
 				
-				if ((get_speed() > 9))
+				if ((get_speed() > 10) && (bridgeCounter > 500))
 				{
 					pattern = 99;
 				}
@@ -144,30 +145,30 @@ int main(void)
 					case 0b11000000:
 						set_encoder(6/*5*/);
 						speed(80, /*0*/-10);
-						handle(115/*95*/ + addition_handle);/* sua 95 */
+						handle(145/*95*/ + addition_handle);/* sua 95 */
 					break;
 					
 					case 0b10000000:
 						set_encoder(6/*5*/);
 						speed(80, /*15*/5);
-						handle(100/*80*/ + addition_handle);/* sua 80*/
+						handle(125/*80*/ + addition_handle);/* sua 80*/
 					break;
 					
 					case 0b00000000:
 						set_encoder(8/*7*/);
 						speed(80, /*20*/10);
-						handle(78/*68*/ + addition_handle);
+						handle(90/*68*/ + addition_handle);
 					break;
 					
 					case 0b00000100:
 						set_encoder(10/*9*/);
 						speed(80, /*25*/15);
-						handle(60/*50*/ + addition_handle);
+						handle(65/*50*/ + addition_handle);
 					break;
 					
 					case 0b00001100:
 						speed(80, /*30*/20);
-						handle(50/*42*/ + addition_handle);
+						handle(55/*42*/ + addition_handle);
 						pattern = 10;
 						set_encoder(-1);
 					break;
@@ -189,32 +190,32 @@ int main(void)
 				switch(sensor_cmp() & 0b00110011)
 				{
 					case 0b00000011:
-						speed_wait(5);
+						set_encoder(6);
 						speed(/*0*/-10,80);
-						handle(-115/*-95*/ - addition_handle);/*sua -95*/
+						handle(-145/*-95*/ - addition_handle);/*sua -95*/
 					break;
 					
 					case 0b00000001:
-						speed_wait(5);
+						set_encoder(6);
 						speed(/*15*/5,80);
-						handle(/*-80*/-100 - addition_handle);/*sua -80*/
+						handle(/*-80*/-125 - addition_handle);/*sua -80*/
 					break;
 					
 					case 0b00000000:
 						set_encoder(8/*7*/);
 						speed(/*20*/10,80);
-						handle(/*-68*/-78 - addition_handle);
+						handle(/*-68*/-90 - addition_handle);
 					break;
 					
 					case 0b00100000:
 						set_encoder(10/*9*/);
 						speed(/*25*/15,80);
-						handle(/*-50*/-60 - addition_handle);
+						handle(/*-50*/-65 - addition_handle);
 					break;
 					
 					case 0b00110000:
 						speed(/*30*/20,80);
-						handle(/*-42*/ - addition_handle);
+						handle(-55/*-42*/ - addition_handle);
 						pattern = 10;
 						set_encoder(-1);
 					break;
@@ -253,54 +254,7 @@ int main(void)
 					encoder_pulse = 0;
 				}
 				
-				switch (sensor_cmp() & 0b01111110)
-				{
-					case 0b01111110:
-					break;
-					
-					case 0b00011000: /* Chay thang */
-					handle( 0 );
-					break;
-					
-					case 0b00011100:
-					case 0b00001000:
-					handle(9 + addition_handle);
-					break;
-					case 0b00001100:
-					handle(17 + addition_handle);
-					break;
-					case 0b00001110:
-					case 0b00000100:
-					handle(31 + addition_handle);
-					break;
-					case 0b00000110:
-					handle(50 + addition_handle);
-					break;
-					case 0b00000010:
-					handle(75 + addition_handle);
-					break;
-					
-					case 0b00111000:
-					case 0b00010000:
-					handle(-9 - addition_handle);
-					break;
-					case 0b00110000:
-					handle(-17 - addition_handle);
-					break;
-					case 0b01110000:
-					case 0b00100000:
-					handle(-31 - addition_handle);
-					break;
-					case 0b01100000:
-					handle(-50 - addition_handle);
-					break;
-					case 0b01000000:
-					handle(-75 - addition_handle);
-					break;
-					
-					default:
-					break;
-				}
+				center_no_speed();
 			break; /* case 22 */
 			
 			case 23:
@@ -334,65 +288,7 @@ int main(void)
 				}
 				
 				/* Nguoc lai thi chinh thang cho xe */
-				switch (sensor & 0b01111110)
-				{
-					case 0b01111110:
-					break;
-					
-					case 0b00011000: /* Chay thang */
-					handle( 0 );
-					//speed( 100 ,100 );
-					break;
-					
-					case 0b00011100:
-					case 0b00001000:
-					//speed(100,100);
-					handle(9 + addition_handle);
-					break;
-					case 0b00001100:
-					//speed(100,100);
-					handle(17 + addition_handle);
-					break;
-					case 0b00001110:
-					case 0b00000100:
-					//speed(100,85);
-					handle(31 + addition_handle);
-					break;
-					case 0b00000110:
-					//speed(100,80);
-					handle(50 + addition_handle);
-					break;
-					case 0b00000010:
-					//speed(100,70);
-					handle(75 + addition_handle);
-					break;
-					
-					case 0b00111000:
-					case 0b00010000:
-					//speed(100,100);
-					handle(-9 - addition_handle);
-					break;
-					case 0b00110000:
-					//speed(100,100);
-					handle(-17 - addition_handle);
-					break;
-					case 0b01110000:
-					case 0b00100000:
-					//speed(85,100);
-					handle(-31 - addition_handle);
-					break;
-					case 0b01100000:
-					//speed(80,100);
-					handle(-50 - addition_handle);
-					break;
-					case 0b01000000:
-					//speed(70,100);
-					handle(-75 - addition_handle);
-					break;
-					
-					default:
-					break;
-				}
+				center_no_speed();
 			break; /* case 23 */
 			
 			case 26: /* trai */
@@ -474,6 +370,8 @@ int main(void)
 					timer_cnt = 0;
 					encoder_pulse=0;
 				}
+				
+				center_no_speed();
 			break; /* case 51 */
 			
 			case 52:
@@ -520,6 +418,8 @@ int main(void)
 					timer_cnt = 0;
 					encoder_pulse=0;
 				}
+				
+				center_no_speed();
 			break; /* case 61 */
 			
 			case 62:
@@ -567,9 +467,13 @@ int main(void)
 			/* Bridge */
 			case 99:
 				led7(99);
-				speed(-100, -100);
-				if (speed_wait(0))
+				speed(-50, -50);
+				
+				center_no_speed();
+				
+				if (speed_wait(3))
 				{
+					speed(70, 70);
 					pattern = 10;
 				};
 			break; /* case 99 */
@@ -604,10 +508,62 @@ bool check_crossline( void )
 bool check_rightline( void )
 {
 	sensor = sensor_cmp();
-	return (((sensor & 0b00001111) == 0b00001111) || ((sensor & 0b00011111) == 0b00011111));
+	return (((sensor & 0b00001111) == 0b00001111) || ((sensor & 0b00011111) == 0b00011111) || ((sensor & 0b00000111) == 0b00000111));
 }
 bool check_leftline( void )
 {
 	sensor = sensor_cmp();
-	return (((sensor & 0b11110000) == 0b11110000) || ((sensor & 0b11111000) == 0b11111000));
+	return (((sensor & 0b11110000) == 0b11110000) || ((sensor & 0b11111000) == 0b11111000) || ((sensor & 0b11100000) == 0b11100000));
+}
+
+inline void center_no_speed( void )
+{
+	switch (sensor_cmp() & 0b01111110)
+	{
+		case 0b01111110:
+		break;
+		
+		case 0b00011000: /* Chay thang */
+		handle( 0 );
+		break;
+		
+		case 0b00011100:
+		case 0b00001000:
+		handle(9 + addition_handle);
+		break;
+		case 0b00001100:
+		handle(17 + addition_handle);
+		break;
+		case 0b00001110:
+		case 0b00000100:
+		handle(31 + addition_handle);
+		break;
+		case 0b00000110:
+		handle(50 + addition_handle);
+		break;
+		case 0b00000010:
+		handle(75 + addition_handle);
+		break;
+		
+		case 0b00111000:
+		case 0b00010000:
+		handle(-9 - addition_handle);
+		break;
+		case 0b00110000:
+		handle(-17 - addition_handle);
+		break;
+		case 0b01110000:
+		case 0b00100000:
+		handle(-31 - addition_handle);
+		break;
+		case 0b01100000:
+		handle(-50 - addition_handle);
+		break;
+		case 0b01000000:
+		handle(-75 - addition_handle);
+		break;
+		
+		default:
+		break;
+	}
 }
